@@ -17,8 +17,8 @@ You can use any landing page to build custom unsubscribe page with new tokens:
 
 #### For all emails:
 
-{custom_unsubscribe_segment=alias-of-segment} - subscribe/unsubscribe link to any segment
-{custom_unsubscribe_channel=channel} - subscribe/unsubscribe link to any channel (email, sms)
+- {custom_unsubscribe_segment=alias-of-segment} - subscribe/unsubscribe link to any segment
+- {custom_unsubscribe_channel=channel} - subscribe/unsubscribe link to any channel (email, sms)
 
 
 #### For segment (broadast email) email
