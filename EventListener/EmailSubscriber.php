@@ -41,16 +41,17 @@ class EmailSubscriber extends CommonSubscriber
     public function __construct(CustomUnsubscribeSettings $customUnsubscribeSettings, TokenHelper $tokenHelper)
     {
         $this->customUnsubscribeSettings = $customUnsubscribeSettings;
-        $this->tokenHelper = $tokenHelper;
+        $this->tokenHelper               = $tokenHelper;
     }
+
     /**
      * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
         return [
-            EmailEvents::EMAIL_ON_BUILD   => ['onEmailBuild', 0],
-            EmailEvents::EMAIL_ON_SEND    => ['onEmailGenerate', 0],
+            EmailEvents::EMAIL_ON_BUILD => ['onEmailBuild', 0],
+            EmailEvents::EMAIL_ON_SEND => ['onEmailGenerate', 0],
             EmailEvents::EMAIL_ON_DISPLAY => ['onEmailDisplay', 0],
         ];
     }
@@ -68,7 +69,14 @@ class EmailSubscriber extends CommonSubscriber
 
         if ($event->tokensRequested(CustomUnsubscribeSettings::customUnsubscribePageRegex)) {
             $tokenHelper = new BuilderTokenHelper($this->factory, 'page');
-            $event->addTokensFromHelper($tokenHelper, CustomUnsubscribeSettings::customUnsubscribePageRegex, 'alias', 'alias', false, true);
+            $event->addTokensFromHelper(
+                $tokenHelper,
+                CustomUnsubscribeSettings::customUnsubscribePageRegex,
+                'alias',
+                'alias',
+                false,
+                true
+            );
         }
     }
 
@@ -91,18 +99,20 @@ class EmailSubscriber extends CommonSubscriber
             return;
         }
 
+        $ct = [];
+        if ($event->getEmail() && $event->getEmail()->getId() && !empty($event->getLead()['id'])) {
+            $ct = ['hash' => $event->getIdHash()];
+        }
+
+
         $content = $event->getContent();
-        $tokens = $this->tokenHelper->findPageTokens($content,['hash'=>$event->getIdHash()]);
-        foreach ($tokens as $token=>$url) {
+        $tokens  = $this->tokenHelper->findPageTokens($content, $ct);
+        foreach ($tokens as $token => $url) {
             $content = str_ireplace('href="'.$token, 'mautic:disable-tracking href="'.$url, $content);
             $content = str_ireplace($token, $url, $content);
         }
         $event->setContent($content);
 
 
-
-        if ($event->getEmail() && $event->getEmail()->getId() && !empty($event->getLead()['id'])) {
-
-        }
     }
 }

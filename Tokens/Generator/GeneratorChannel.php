@@ -17,7 +17,7 @@ use Mautic\LeadBundle\Entity\Lead;
 use Mautic\LeadBundle\Model\DoNotContact;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class GeneratorChannel implements InterfaceGenerator
+class GeneratorChannel extends AbstractGenerator implements InterfaceGenerator
 {
     /**
      * @var DoNotContact

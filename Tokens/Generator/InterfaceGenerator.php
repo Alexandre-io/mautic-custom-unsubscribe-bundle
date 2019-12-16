@@ -19,4 +19,8 @@ interface InterfaceGenerator
     public function subscribe();
 
     public function isSubscribed();
+
+    public function getUnsubscribeText();
+
+    public function getSubscribeText();
 }

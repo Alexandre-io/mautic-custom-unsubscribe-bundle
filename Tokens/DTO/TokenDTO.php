@@ -36,7 +36,7 @@ class TokenDTO
      * @param string $value
      * @param string $tokenType
      */
-    public function __construct($token, $value, $tokenType)
+    public function __construct($token, $value, $tokenType = null)
   {
       $this->token = $token;
       $this->value = $value;

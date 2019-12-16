@@ -12,9 +12,10 @@ use Mautic\PluginBundle\Helper\IntegrationHelper;
 
 class CustomUnsubscribeSettings
 {
-    CONST customUnsubscribePageRegex = '{custom_unsubscribe_page=(.*?)}';
-    CONST customUnsubscribeChannelRegex = '{custom_unsubscribe_channel=(.*?)}';
-    CONST customUnsubscribeSegmentRegex = '{custom_unsubscribe_segment=(.*?)}';
+    CONST customUnsubscribePageRegex      = '{custom_unsubscribe_page=(.*?)}';
+    CONST customUnsubscribeChannelRegex   = '{custom_unsubscribe_channel=(.*?)}';
+    CONST customUnsubscribeSegmentRegex   = '{custom_unsubscribe_segment=(.*?)}';
+    CONST customUnsubscribeBroadcastRegex = '{custom_unsubscribe_broadcast}';
 
     /**
      * @var bool|\Mautic\PluginBundle\Integration\AbstractIntegration

@@ -92,7 +92,7 @@ class RequestDTO
      */
     public function isActionRequest()
     {
-        if ($this->action && $this->value) {
+        if ($this->action) {
             return true;
         }
 

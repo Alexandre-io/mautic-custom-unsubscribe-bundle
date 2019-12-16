@@ -35,7 +35,6 @@ class TokenFinder
     public function findTokens($regexp, $content)
     {
         preg_match_all('/'.$regexp.'/i', $content, $matches);
-
         if (!empty($matches[1])) {
             foreach ($matches[1] as $key => $value) {
                 $token = $matches[0][$key];
@@ -46,6 +45,15 @@ class TokenFinder
                 $this->tokens[$token] = new TokenDTO($token, $value, $tokenArray[0]);
             }
             unset($matches);
+        } elseif (!empty($matches[0]) && empty($matches[1])) {
+            foreach ($matches[0] as $key => $value) {
+                $token = $value;
+                if (!empty($this->tokens[$token])) {
+                    continue;
+                }
+                $tokenType =  str_replace(['{', '}'], '', $token);
+                $this->tokens[$token] = new TokenDTO($token, '', $tokenType);
+            }
         }
     }
 

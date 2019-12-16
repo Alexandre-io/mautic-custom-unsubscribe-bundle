@@ -16,6 +16,8 @@ use Mautic\CoreBundle\Helper\ClickthroughHelper;
 use Mautic\PageBundle\Event as Events;
 use Mautic\PageBundle\PageEvents;
 use Mautic\LeadBundle\LeadEvent;
+use MauticPlugin\MauticCustomUnsubscribeBundle\Exception\CustomUnsubscribeNotFoundException;
+use MauticPlugin\MauticCustomUnsubscribeBundle\Exception\TokenNotFoundException;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Helper\TokenHelper;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Integration\CustomUnsubscribeSettings;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\RequestDTO;
@@ -91,18 +93,40 @@ class PageSubscriber extends CommonSubscriber
     {
         $content = $event->getContent();
 
-        $requestDTO = new RequestDTO($this->request);
-        $channelDTO = $this->tokenFactory->getChannelDTO($requestDTO->getHash());
-        $tokens = $this->tokenFactory->getTokens($event->getContent());
+        try {
+            $requestDTO = new RequestDTO($this->request);
+            $channelDTO = $this->tokenFactory->getChannelDTO($requestDTO->getHash());
+            $tokens     = $this->tokenFactory->getTokens($event->getContent());
+        } catch (CustomUnsubscribeNotFoundException $customUnsubscribeNotFoundException) {
+            return;
+        }
 
         foreach ($tokens as $token) {
-            $unsubscribeDTO = new UnsubscribeDTO($event, $requestDTO, $token, $channelDTO);
-            if ($requestDTO->isActionRequest()
-                && $requestDTO->getAction() == $token->getTokenType()
-                && $requestDTO->getValue() == $token->getValue()) {
-                $this->generatorFactory->action($unsubscribeDTO);
+            try {
+                $unsubscribeDTO = new UnsubscribeDTO($event, $requestDTO, $token, $channelDTO);
+                if ($requestDTO->isActionRequest()
+                    && $requestDTO->getAction() == $token->getTokenType()
+                    && $requestDTO->getValue() == $token->getValue()) {
+                    $this->generatorFactory->action($unsubscribeDTO);
+                    $content = str_replace(
+                        '</body>',
+                        $this->generatorFactory->redirection($unsubscribeDTO).'</body>',
+                        $content
+                    );
+                    $event->setContent($content);
+                }
+                $content = str_replace(
+                    $token->getToken(),
+                    $this->generatorFactory->getOutput($unsubscribeDTO),
+                    $content
+                );
+            } catch (TokenNotFoundException $tokenNotFoundException) {
+                $content = str_replace(
+                    $token->getToken(),
+                    '',
+                    $content
+                );
             }
-            $content = str_replace($token->getToken(), $this->generatorFactory->getOutput($unsubscribeDTO), $content);
         }
 
         $event->setContent($content);

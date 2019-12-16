@@ -15,7 +15,7 @@ namespace MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\Generator;
 
 use Mautic\PageBundle\Model\PageModel;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\UnsubscribeDTO;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class GeneratorFactory
 {
@@ -35,31 +35,57 @@ class GeneratorFactory
     private $generatorSegment;
 
     /**
+     * @var GeneratorBroadcast
+     */
+    private $generatorBroadcast;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @var GeneratorSegmentNameBroadcast
+     */
+    private $segmentNameBroadcast;
+
+    /**
      * GeneratorFactory constructor.
      *
-     * @param PageModel        $pageModel
-     * @param GeneratorChannel $generatorChannel
-     * @param GeneratorSegment $generatorSegment
+     * @param PageModel                     $pageModel
+     * @param GeneratorChannel              $generatorChannel
+     * @param GeneratorSegment              $generatorSegment
+     * @param GeneratorBroadcast            $generatorSegmentName
+     * @param GeneratorSegmentNameBroadcast $segmentNameBroadcast
+     * @param TranslatorInterface           $translator
      */
-    public function __construct(PageModel $pageModel, GeneratorChannel $generatorChannel, GeneratorSegment $generatorSegment)
+    public function __construct(PageModel $pageModel, GeneratorChannel $generatorChannel, GeneratorSegment $generatorSegment, GeneratorBroadcast $generatorSegmentName, GeneratorSegmentNameBroadcast $segmentNameBroadcast, TranslatorInterface $translator)
     {
-        $this->pageModel = $pageModel;
-        $this->generatorChannel = $generatorChannel;
-        $this->generatorSegment = $generatorSegment;
+        $this->pageModel          = $pageModel;
+        $this->generatorChannel   = $generatorChannel;
+        $this->generatorSegment   = $generatorSegment;
+        $this->generatorBroadcast = $generatorSegmentName;
+        $this->segmentNameBroadcast = $segmentNameBroadcast;
+        $this->translator = $translator;
     }
 
     public function getOutput(UnsubscribeDTO $unsubscribeDTO)
     {
         $generator = $this->getGenerator($unsubscribeDTO);
-        return '<a href="'.$this->getActionUrl($unsubscribeDTO).'">'.$this->getActionText($generator).'</a>';
+        return $generator->getOutput($this, $unsubscribeDTO);
     }
 
+    /**
+     * @param InterfaceGenerator $generator
+     *
+     * @return string
+     */
     public function getActionText(InterfaceGenerator $generator)
     {
         if ($generator->isSubscribed()) {
-            return 'unsubscribe';
+            return $this->translator->trans($generator->getUnsubscribeText());
         }else{
-            return 'subscribe';
+            return $this->translator->trans($generator->getSubscribeText());
         }
     }
 
@@ -79,15 +105,26 @@ class GeneratorFactory
         }else{
             $generator->subscribe();
         }
-
-        $url = $this->pageModel->generateUrl($unsubscribeDTO->getPage(), true,$unsubscribeDTO->generateRedirectClickthrought() );
-
     }
 
     /**
      * @param UnsubscribeDTO $unsubscribeDTO
      *
-     * @return InterfaceGenerator
+     * @return string
+     */
+    public function redirection(UnsubscribeDTO $unsubscribeDTO)
+    {
+        return '<script>
+location.href = \''.$this->pageModel->generateUrl($unsubscribeDTO->getPage(), true,$unsubscribeDTO->generateRedirectClickthrought()).'\';
+</script>';
+    }
+
+
+    /**
+     * @param UnsubscribeDTO $unsubscribeDTO
+     *
+     * @return GeneratorBroadcast|GeneratorChannel|GeneratorSegment
+     * @throws \MauticPlugin\MauticCustomUnsubscribeBundle\Exception\TokenNotFoundException
      */
     private function getGenerator(UnsubscribeDTO $unsubscribeDTO)
     {
@@ -100,6 +137,14 @@ class GeneratorFactory
             case 'custom_unsubscribe_segment':
                 $this->generatorSegment->setUnsubscribeDTO($unsubscribeDTO);
                 return $this->generatorSegment;
+                break;
+           case 'custom_unsubscribe_broadcast':
+                $this->generatorBroadcast->setUnsubscribeDTO($unsubscribeDTO);
+                return $this->generatorBroadcast;
+                break;
+                case 'custom_unsubscribe_broadcast_segment_name':
+                $this->segmentNameBroadcast->setUnsubscribeDTO($unsubscribeDTO);
+                return $this->segmentNameBroadcast;
                 break;
         }
 

@@ -13,6 +13,7 @@ namespace MauticPlugin\MauticCustomUnsubscribeBundle\Tokens;
 
 
 use Mautic\EmailBundle\Model\EmailModel;
+use MauticPlugin\MauticCustomUnsubscribeBundle\Exception\CustomUnsubscribeNotFoundException;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Integration\CustomUnsubscribeSettings;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\TokenDTO;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\ChannelDTO;
@@ -20,7 +21,11 @@ use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\ChannelDTO;
 class TokenFactory
 {
     private $regexs = [
-        CustomUnsubscribeSettings::customUnsubscribeChannelRegex, CustomUnsubscribeSettings::customUnsubscribeSegmentRegex];
+        CustomUnsubscribeSettings::customUnsubscribeChannelRegex,
+        CustomUnsubscribeSettings::customUnsubscribeSegmentRegex,
+        CustomUnsubscribeSettings::customUnsubscribeBroadcastRegex,
+        '{custom_unsubscribe_broadcast_segment_name}'
+    ];
 
     /**
      * @var EmailModel
@@ -35,12 +40,12 @@ class TokenFactory
     /**
      * TokenFactory constructor.
      *
-     * @param EmailModel            $emailModel
-     * @param TokenFinder           $tokenFinder
+     * @param EmailModel  $emailModel
+     * @param TokenFinder $tokenFinder
      */
     public function __construct(EmailModel $emailModel, TokenFinder $tokenFinder)
     {
-        $this->emailModel = $emailModel;
+        $this->emailModel  = $emailModel;
         $this->tokenFinder = $tokenFinder;
     }
 
@@ -60,16 +65,25 @@ class TokenFactory
     }
 
     /**
-     * @param string $hash
+     * @param $hash
      *
      * @return ChannelDTO
+     * @throws CustomUnsubscribeNotFoundException
      */
     public function getChannelDTO($hash)
     {
         $stat = $this->emailModel->getEmailStatus($hash);
-        if ($stat) {
-            return new ChannelDTO($stat->getLead(), 'email', $stat->getEmail()->getId());
+
+        if (!$stat) {
+            throw new CustomUnsubscribeNotFoundException();
         }
+
+        return new ChannelDTO(
+            $stat->getLead(),
+            'email',
+            $stat->getEmail() ? $stat->getEmail()->getId() : null,
+            $stat->getList() ? $stat->getList()->getAlias() : null
+        );
     }
 
 }

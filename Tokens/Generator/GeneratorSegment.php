@@ -18,36 +18,32 @@ use Mautic\LeadBundle\Entity\ListLead;
 use Mautic\LeadBundle\Model\DoNotContact;
 use Mautic\LeadBundle\Model\LeadModel;
 use Mautic\LeadBundle\Model\ListModel;
+use MauticPlugin\MauticCustomUnsubscribeBundle\Exception\TokenNotFoundException;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\UnsubscribeDTO;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class GeneratorSegment implements InterfaceGenerator
+class GeneratorSegment extends AbstractGenerator implements InterfaceGenerator
 {
-
-    /**
-     * @var Lead
-     */
-    private $contact;
 
     /**
      * @var LeadModel
      */
-    private $leadModel;
+    protected $leadModel;
 
     /**
      * @var UnsubscribeDTO
      */
-    private $unsubscribeDTO;
+    protected $unsubscribeDTO;
 
     /**
      * @var ListModel
      */
-    private $listModel;
+    protected $listModel;
 
     /**
      * @var LeadList
      */
-    private $segment;
+    protected $segment;
 
     public function __construct(LeadModel $leadModel, ListModel $listModel)
     {
@@ -55,15 +51,14 @@ class GeneratorSegment implements InterfaceGenerator
         $this->listModel = $listModel;
     }
 
-
     public function unsubscribe()
     {
-        $this->leadModel->removeFromLists($this->unsubscribeDTO->getChannelDTO()->getContact(), $this->segment);
+        $this->leadModel->removeFromLists($this->unsubscribeDTO->getChannelDTO()->getContact(), $this->segment, true);
     }
 
     public function subscribe()
     {
-        $this->leadModel->addToLists($this->unsubscribeDTO->getChannelDTO()->getContact(), $this->segment);
+        $this->leadModel->addToLists($this->unsubscribeDTO->getChannelDTO()->getContact(), $this->segment, true);
     }
 
     /**
@@ -77,6 +72,9 @@ class GeneratorSegment implements InterfaceGenerator
     public function setUnsubscribeDTO(UnsubscribeDTO $unsubscribeDTO) {
         $this->unsubscribeDTO = $unsubscribeDTO;
         $this->segment = $this->listModel->getRepository()->findOneBy(['alias' => $unsubscribeDTO->getTokenDTO()->getValue()]);
+        if (!$this->segment) {
+            throw new TokenNotFoundException();
+        }
     }
 
 

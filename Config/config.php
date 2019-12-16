@@ -74,7 +74,10 @@ return [
                 'arguments' => [
                     'mautic.page.model.page',
                     'mautic.customunsubscribe.generator.channel',
-                    'mautic.customunsubscribe.generator.segment'
+                    'mautic.customunsubscribe.generator.segment',
+                    'mautic.customunsubscribe.generator.broadcast',
+                    'mautic.customunsubscribe.generator.broadcast.segment_name',
+                    'translator'
                 ],
             ],
 
@@ -88,6 +91,24 @@ return [
 
             'mautic.customunsubscribe.generator.segment' => [
                 'class'     => \MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\Generator\GeneratorSegment::class,
+                'arguments' => [
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.list',
+                    'doctrine.orm.entity_manager'
+                ],
+            ],
+
+            'mautic.customunsubscribe.generator.broadcast' => [
+                'class'     => \MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\Generator\GeneratorBroadcast::class,
+                'arguments' => [
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.list',
+                    'doctrine.orm.entity_manager'
+                ],
+            ],
+
+            'mautic.customunsubscribe.generator.broadcast.segment_name' => [
+                'class'     => \MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\Generator\GeneratorSegmentNameBroadcast::class,
                 'arguments' => [
                     'mautic.lead.model.lead',
                     'mautic.lead.model.list',
