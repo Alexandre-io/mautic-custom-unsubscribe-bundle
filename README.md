@@ -1,5 +1,9 @@
 # Mautic Custom Unsubscribe for Mautic 
 
+Allow use any landing page to build custom unsubscribe page with manage channels and segments.
+First you need linked it in footer with special email token {custom_unsubscribe_page=landing-page-alias}
+Then you can customize that landing page with custom tokens bellow.
+
 ## Installation
 
 ### Manual
@@ -11,24 +15,24 @@
 
 ## Usage
 
-### Landing page
+### 1. Insert link to email footer
+
+Use token {custom_unsubscribe_page=landing-page-alias} to put custom unsubscribe link to landing  page.
+
+### 2. Design Landing page
 
 You can use any landing page to build custom unsubscribe page with new tokens:
 
-#### For all emails:
+#### For any email type:
 
 - {custom_unsubscribe_segment=alias-of-segment} - subscribe/unsubscribe link to any segment
 - {custom_unsubscribe_channel=channel} - subscribe/unsubscribe link to any channel (email, sms)
 
 
-#### For segment (broadast email) email
+#### For segment (broadast email) email type
 
 - {custom_unsubscribe_broadcast} - subscribe/unsubscribe link to segment where broadcast email were sent 
 - {custom_unsubscribe_broadcast_segment_name} - segment name
-
-## Email
-
-Use token {custom_unsubscribe_page=landing-page-alias} to put unsubscribe page to email footer.
 
 ## Example: 
 
