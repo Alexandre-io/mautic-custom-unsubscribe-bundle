@@ -100,7 +100,7 @@ class EmailSubscriber extends CommonSubscriber
         }
 
         $ct = [];
-        if ($event->getEmail() && $event->getEmail()->getId() && !empty($event->getLead()['id'])) {
+        if ($event->getIdHash() && !empty($event->getLead()['id'])) {
             $ct = ['hash' => $event->getIdHash()];
         }
 
