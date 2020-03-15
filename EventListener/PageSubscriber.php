@@ -26,6 +26,7 @@ use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\ChannelDTO;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\UnsubscribeDTO;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\Generator\GeneratorFactory;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\TokenFactory;
+use Monolog\Logger;
 
 /**
  * Class PageSubscriber.
@@ -54,11 +55,12 @@ class PageSubscriber extends CommonSubscriber
      * @param TokenFactory              $tokenFactory
      * @param GeneratorFactory          $generatorFactory
      */
-    public function __construct(CustomUnsubscribeSettings $customUnsubscribeSettings, TokenFactory $tokenFactory, GeneratorFactory $generatorFactory)
+    public function __construct(CustomUnsubscribeSettings $customUnsubscribeSettings, TokenFactory $tokenFactory, GeneratorFactory $generatorFactory, Logger $logger)
     {
         $this->customUnsubscribeSettings = $customUnsubscribeSettings;
         $this->tokenFactory = $tokenFactory;
         $this->generatorFactory = $generatorFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -79,11 +81,6 @@ class PageSubscriber extends CommonSubscriber
      */
     public function onPageBuild(Events\PageBuilderEvent $event)
     {
-
-       /* if ($event->tokensRequested(RecommenderHelper::$recommenderRegex)) {
-            $tokenHelper = new BuilderTokenHelper($this->factory, 'recommender');
-            $event->addTokensFromHelper($tokenHelper, RecommenderHelper::$recommenderRegex, 'name', 'id', true);
-        }*/
     }
 
     /**
@@ -92,7 +89,6 @@ class PageSubscriber extends CommonSubscriber
     public function onPageDisplay(Events\PageDisplayEvent $event)
     {
         $content = $event->getContent();
-
         try {
             $requestDTO = new RequestDTO($this->request);
             $channelDTO = $this->tokenFactory->getChannelDTO($requestDTO->getHash());
@@ -100,7 +96,6 @@ class PageSubscriber extends CommonSubscriber
         } catch (CustomUnsubscribeNotFoundException $customUnsubscribeNotFoundException) {
             return;
         }
-
         foreach ($tokens as $token) {
             try {
                 $unsubscribeDTO = new UnsubscribeDTO($event, $requestDTO, $token, $channelDTO);
@@ -126,6 +121,7 @@ class PageSubscriber extends CommonSubscriber
                     '',
                     $content
                 );
+                $this->logger->debug($tokenNotFoundException->getMessage());
             }
         }
 

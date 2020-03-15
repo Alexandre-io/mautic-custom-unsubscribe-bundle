@@ -39,17 +39,17 @@ class ChannelDTO
     /**
      * UnsubscribeChannelDTO constructor.
      *
-     * @param Lead   $contact
-     * @param string $channel
-     * @param int|null    $channelId
-     * @param int|null   $segmentId
+     * @param Lead     $contact
+     * @param string   $channel
+     * @param int|null $channelId
+     * @param string|null $segmentAlias
      */
-    public function __construct(Lead $contact, $channel, $channelId= null, $segmentId = null)
+    public function __construct(Lead $contact, $channel, $channelId= null, $segmentAlias = null)
    {
        $this->channel      = $channel;
        $this->contact      = $contact;
        $this->channelId    = $channelId;
-       $this->segmentAlias = $segmentId;
+       $this->segmentAlias = $segmentAlias;
    }
 
     /**

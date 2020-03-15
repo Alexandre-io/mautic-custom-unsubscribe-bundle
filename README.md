@@ -29,10 +29,10 @@ You can use any landing page to build custom unsubscribe page with new tokens:
 - {custom_unsubscribe_channel=channel} - subscribe/unsubscribe link to any channel (email, sms)
 
 
-#### For segment (broadast email) email type
+#### For segment (broadast email) email/campaign email
 
-- {custom_unsubscribe_broadcast} - subscribe/unsubscribe link to segment where broadcast email were sent 
-- {custom_unsubscribe_broadcast_segment_name} - segment name
+- {custom_unsubscribe} - subscribe/unsubscribe link to segment where broadcast email were sent or campaign email was sent (source of campaign)
+- {custom_unsubscribe_segment_name} - segment name
 
 ## Example: 
 

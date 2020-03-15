@@ -12,7 +12,10 @@
 namespace MauticPlugin\MauticCustomUnsubscribeBundle\Tokens;
 
 
+use Mautic\CampaignBundle\Entity\Event;
+use Mautic\CampaignBundle\Model\EventModel;
 use Mautic\EmailBundle\Model\EmailModel;
+use Mautic\LeadBundle\Entity\LeadList;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Exception\CustomUnsubscribeNotFoundException;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Integration\CustomUnsubscribeSettings;
 use MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\DTO\TokenDTO;
@@ -23,8 +26,8 @@ class TokenFactory
     private $regexs = [
         CustomUnsubscribeSettings::customUnsubscribeChannelRegex,
         CustomUnsubscribeSettings::customUnsubscribeSegmentRegex,
-        CustomUnsubscribeSettings::customUnsubscribeBroadcastRegex,
-        '{custom_unsubscribe_broadcast_segment_name}'
+        CustomUnsubscribeSettings::customUnsubscribeRegex,
+        CustomUnsubscribeSettings::customUnsubscribeSegmentNameRegex,
     ];
 
     /**
@@ -38,15 +41,22 @@ class TokenFactory
     private $tokenFinder;
 
     /**
+     * @var EventModel
+     */
+    private $eventModel;
+
+    /**
      * TokenFactory constructor.
      *
      * @param EmailModel  $emailModel
      * @param TokenFinder $tokenFinder
+     * @param EventModel  $eventModel
      */
-    public function __construct(EmailModel $emailModel, TokenFinder $tokenFinder)
+    public function __construct(EmailModel $emailModel, TokenFinder $tokenFinder, EventModel $eventModel)
     {
         $this->emailModel  = $emailModel;
         $this->tokenFinder = $tokenFinder;
+        $this->eventModel = $eventModel;
     }
 
     /**
@@ -78,11 +88,25 @@ class TokenFactory
             throw new CustomUnsubscribeNotFoundException();
         }
 
+        $segmentAlias = $stat->getList() ? $stat->getList()->getAlias() : null;
+
+        if ('campaign.event' == $stat->getSource()) {
+            $sourceId = $stat->getSourceId();
+            /** @var Event $campaignEvent */
+            $campaignEvent = $this->eventModel->getEntity($sourceId);
+            $segments = $campaignEvent->getCampaign()->getLists();
+
+            /** @var LeadList $segment */
+            $segment = $segments->first();
+            if ($segment) {
+                $segmentAlias = $segment->getAlias();
+            }
+        }
         return new ChannelDTO(
             $stat->getLead(),
             'email',
             $stat->getEmail() ? $stat->getEmail()->getId() : null,
-            $stat->getList() ? $stat->getList()->getAlias() : null
+            $segmentAlias
         );
     }
 

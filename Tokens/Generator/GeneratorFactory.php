@@ -138,11 +138,11 @@ location.href = \''.$this->pageModel->generateUrl($unsubscribeDTO->getPage(), tr
                 $this->generatorSegment->setUnsubscribeDTO($unsubscribeDTO);
                 return $this->generatorSegment;
                 break;
-           case 'custom_unsubscribe_broadcast':
+           case 'custom_unsubscribe':
                 $this->generatorBroadcast->setUnsubscribeDTO($unsubscribeDTO);
                 return $this->generatorBroadcast;
                 break;
-                case 'custom_unsubscribe_broadcast_segment_name':
+                case 'custom_unsubscribe_segment_name':
                 $this->segmentNameBroadcast->setUnsubscribeDTO($unsubscribeDTO);
                 return $this->segmentNameBroadcast;
                 break;

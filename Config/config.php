@@ -24,6 +24,7 @@ return [
                     'mautic.customunsubscribe.integration.settings',
                     'mautic.customunsubscribe.token.factory',
                     'mautic.customunsubscribe.generator.factory',
+                    'monolog.logger.mautic'
                 ],
             ],
         ],
@@ -58,7 +59,8 @@ return [
                 'class'     => \MauticPlugin\MauticCustomUnsubscribeBundle\Tokens\TokenFactory::class,
                 'arguments' => [
                     'mautic.email.model.email',
-                    'mautic.customunsubscribe.token.finder'
+                    'mautic.customunsubscribe.token.finder',
+                    'mautic.campaign.model.event'
                 ],
             ],
 
